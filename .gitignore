@@ -1,0 +1,6 @@
+# LaTeX build artifacts
+review-text/*.aux
+review-text/*.log
+review-text/*.out
+review-text/*.toc
+review-text/*.synctex.gz

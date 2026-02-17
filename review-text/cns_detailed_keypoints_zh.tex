@@ -1,0 +1,405 @@
+\documentclass[12pt,a4paper]{ctexart}
+\usepackage[a4paper,margin=2.1cm]{geometry}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{titlesec}
+\setlist[itemize]{leftmargin=1.8em,itemsep=0.35em}
+\setlist[enumerate]{leftmargin=2.0em,itemsep=0.35em}
+\hypersetup{colorlinks=true,linkcolor=black,urlcolor=blue}
+\titleformat{\section}{\large\bfseries}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{0.6em}{}
+
+\title{CNS 详细知识点中文总结（Week 1--14）}
+\author{}
+\date{\today}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+\section{使用说明与复习策略}
+
+\subsection{资料范围}
+本文基于你目录中的全部课件文本（Week 1, 2, 3--4, 5--6, 7, 8--9, 10--11, 12, 13--14）整理，覆盖课程主线与高频考点。
+
+\subsection{建议复习顺序}
+\begin{enumerate}
+  \item 先建立主框架：安全目标、机制、威胁与分层。
+  \item 再攻克认证与访问控制：\texttt{PAP/CHAP}、\texttt{BLP/Biba}、\texttt{RBAC}。
+  \item 再学网络协议与架构：\texttt{Kerberos}、\texttt{IPSec}、\texttt{SSL/TLS}、防火墙与 \texttt{DMZ}。
+  \item 最后做综合设计题：规则设计、分区部署、加固与检测响应联动。
+\end{enumerate}
+
+\section{课程总框架（Week 1--2 主干）}
+
+\subsection{安全服务与目标}
+课程主线围绕以下安全目标展开：
+\begin{itemize}
+  \item \textbf{Confidentiality（机密性）}：防止未授权读取。
+  \item \textbf{Integrity（完整性）}：防止未授权篡改。
+  \item \textbf{Availability（可用性）}：系统按需可访问。
+  \item \textbf{Authentication（认证）}：证明实体身份。
+  \item \textbf{Access Control（访问控制）}：限制谁能访问什么。
+  \item \textbf{Non-repudiation（不可否认性）}：行为不可抵赖。
+\end{itemize}
+
+\subsection{服务与机制映射（必背）}
+\begin{itemize}
+  \item 机密性 $\rightarrow$ 加密（对称/非对称）。
+  \item 实体认证 $\rightarrow$ 认证协议（挑战应答、证书、票据机制）。
+  \item 完整性与数据来源认证 $\rightarrow$ \texttt{MAC} 或数字签名。
+  \item 不可否认性 $\rightarrow$ 数字签名（通常需证书体系支撑）。
+\end{itemize}
+
+\subsection{安全工程三分法：AAA + PDR}
+\begin{itemize}
+  \item \texttt{AAA}：\texttt{Authentication, Authorization, Auditing}。
+  \item \texttt{PDR}：\texttt{Prevention, Detection, Response}。
+  \item 典型认识：预防最理想但成本高；检测更易落地；响应决定恢复效率与损失控制。
+\end{itemize}
+
+\subsection{分层思维}
+\begin{itemize}
+  \item 网络架构分层（OSI/TCP-IP）意味着：\textbf{下层漏洞会被上层继承}。
+  \item 安全设计要按层识别攻击面，不要只靠单点工具。
+\end{itemize}
+
+\section{密码学与认证基础（Week 1, 3--4）}
+
+\subsection{密码学原语体系}
+\begin{itemize}
+  \item 对称加密：效率高，密钥分发难。
+  \item 非对称加密：分发友好，计算开销大。
+  \item 哈希函数：单向摘要，常用于完整性校验与口令存储。
+  \item \texttt{MAC}：用共享密钥做消息认证，提供完整性与来源认证。
+  \item 数字签名：提供完整性、来源认证与不可否认性。
+  \item 证书与 \texttt{PKI}：把“身份”与“公钥”绑定，建立可验证信任链。
+\end{itemize}
+
+\subsection{身份认证方法全景}
+\begin{itemize}
+  \item 知识因子：口令、PIN。
+  \item 持有因子：令牌、智能卡。
+  \item 生物因子：指纹、人脸、虹膜、行为特征。
+  \item 实务建议：敏感系统优先多因子，不应只依赖口令。
+\end{itemize}
+
+\subsection{口令安全与常见攻击}
+\begin{itemize}
+  \item 风险来源：弱口令、重用口令、可预测规则、错误提示泄露、口令传输被嗅探。
+  \item 攻击方式：字典/暴力破解、离线哈希碰撞、账号枚举（account harvesting）。
+  \item 防护思路：强策略、限速与锁定、统一错误信息、口令哈希加盐、审计告警。
+\end{itemize}
+
+\subsection{\texttt{PAP} 与 \texttt{CHAP}（高频对比）}
+\begin{itemize}
+  \item \texttt{PAP}：口令或口令哈希可被重放，整体偏弱。
+  \item \texttt{CHAP}：挑战应答机制，挑战值每次变化，抗重放显著更好。
+  \item \texttt{CHAP}流程：\texttt{ID} $\rightarrow$ \texttt{Challenge} $\rightarrow$ \texttt{Response} $\rightarrow$ 验证通过/拒绝。
+\end{itemize}
+
+\subsection{SSO 与一次性口令}
+\begin{itemize}
+  \item \texttt{SSO}优点是体验好；核心风险是单点账号被盗后横向影响大。
+  \item \texttt{OTP}（如 RSA SecurID、S/Key）可抵抗窃听后的重放，但通常不能单独解决会话劫持等问题。
+\end{itemize}
+
+\subsection{证书认证与私钥保护}
+\begin{itemize}
+  \item 证书认证强度很大程度取决于\textbf{私钥保护}。
+  \item 智能卡/硬件令牌价值：把私钥从通用主机环境中隔离出来。
+\end{itemize}
+
+\subsection{生物特征认证（理解型考点）}
+\begin{itemize}
+  \item 优点：不可遗忘、使用便捷、可提升认证强度。
+  \item 难点：误识率权衡、隐私风险、模板泄露不可撤销、伪造攻击（fake biometrics）。
+  \item 结论：生物特征适合做增强因子，不宜被神化为“万能认证”。
+\end{itemize}
+
+\section{访问控制模型（Week 5--6）}
+
+\subsection{访问控制结构}
+\begin{itemize}
+  \item 访问控制矩阵：行可看作主体能力（Capabilities），列可看作对象 \texttt{ACL}。
+  \item \texttt{ACL}管理的痛点：规模变大后维护复杂，容易引入误配。
+  \item 组与角色可降低权限管理复杂度。
+\end{itemize}
+
+\subsection{\texttt{DAC/MAC/RBAC}}
+\begin{itemize}
+  \item \texttt{DAC}：资源拥有者可自主授权，灵活但容易扩散。
+  \item \texttt{MAC}：按安全级别强制控制，规则严格。
+  \item \texttt{RBAC}：按岗位角色分配权限，工程可维护性通常最好。
+\end{itemize}
+
+\subsection{Bell-LaPadula（保密性模型）}
+\begin{itemize}
+  \item 目标：防止敏感信息向低级别泄露。
+  \item 核心规则：\texttt{No Read Up}，\texttt{No Write Down}。
+  \item 常见考试点：读写方向不要记反。
+\end{itemize}
+
+\subsection{Biba（完整性模型）}
+\begin{itemize}
+  \item 目标：防止低完整性数据污染高完整性对象。
+  \item 核心规则：\texttt{No Read Down}，\texttt{No Write Up}（执行也避免“向上污染”）。
+  \item 与 \texttt{BLP}关系：方向几乎完全相反。
+\end{itemize}
+
+\subsection{部分序与分类分区（categories）}
+\begin{itemize}
+  \item 安全级别不仅有等级（如 Secret/Top Secret），还可叠加分类分区。
+  \item 通过“级别 + 分区集合”做支配关系比较，用于更细粒度策略表达。
+\end{itemize}
+
+\subsection{Chinese Wall 模型}
+\begin{itemize}
+  \item 面向利益冲突场景（咨询、金融、审计）。
+  \item 关注点是“防跨冲突域信息流动”，强调动态冲突约束。
+\end{itemize}
+
+\section{恶意代码体系（Week 7）}
+
+\subsection{主要类型与特征}
+\begin{itemize}
+  \item Virus：依附宿主传播。
+  \item Worm：利用网络漏洞自传播。
+  \item Trojan：伪装诱导执行，通常不自传播。
+  \item Spyware/Keylogger：窃取行为与敏感输入。
+  \item Rootkit：隐藏攻击痕迹与恶意能力。
+  \item Backdoor/Botnet：持久控制与批量远程操控。
+  \item Logic Bomb：条件触发恶意逻辑。
+\end{itemize}
+
+\subsection{防护与检测思路}
+\begin{itemize}
+  \item 特征库查杀：对已知样本有效，对变种和未知样本有限。
+  \item 行为检测：可提升未知威胁发现率，但误报控制难。
+  \item 工程策略：最小权限、补丁、端点防护、流量监控、备份恢复、应急预案。
+\end{itemize}
+
+\section{认证协议理论与实例（Week 8--11）}
+
+\subsection{实体认证核心概念}
+\begin{itemize}
+  \item 单向认证：只证明一方身份。
+  \item 双向认证：双方互证身份。
+  \item 认证是时点行为，若要持续安全，需要后续会话密钥保护。
+\end{itemize}
+
+\subsection{认证协议通用要求（高频）}
+课件模型强调至少关注：
+\begin{enumerate}
+  \item 消息来源真实性（确由对方发出）。
+  \item 消息新鲜性（非旧报文重放）。
+  \item 消息目标绑定（确实发给本方）。
+  \item 消息时序绑定（响应与请求强关联，不可被“调包”）。
+\end{enumerate}
+
+\subsection{新鲜性机制：时间戳 vs Nonce}
+\begin{itemize}
+  \item 时间戳优点：消息轮次少，适合客户端-服务端模式。
+  \item 时间戳缺点：依赖时钟同步，且需要处理消息关联问题。
+  \item Nonce 优点：不依赖全局时钟，抗重放清晰。
+  \item Nonce 要求：随机且不可预测，否则协议安全性下降。
+\end{itemize}
+
+\subsection{消息关联（Linking Messages）}
+\begin{itemize}
+  \item 防止攻击者在并发请求中“错配响应”。
+  \item 常见做法：引入事务标识（transaction ID）或挑战值绑定。
+\end{itemize}
+
+\subsection{Kerberos（重点流程）}
+\begin{itemize}
+  \item 核心角色：\texttt{AS}、\texttt{TGS}、客户端 \texttt{C}、服务端 \texttt{S}。
+  \item 核心思想：用票据与短期会话密钥减少长期密钥暴露。
+  \item 典型流程：
+  \begin{enumerate}
+    \item \texttt{C -> AS}：获取 \texttt{TGT} 与相关密钥材料。
+    \item \texttt{C -> TGS}：凭 \texttt{TGT} 申请某服务票据。
+    \item \texttt{C -> S}：携票据访问服务并完成会话建立。
+  \end{enumerate}
+\end{itemize}
+
+\subsection{证书与密钥分发}
+\begin{itemize}
+  \item 证书是“身份 + 公钥 + 有效期 + 签名”绑定体。
+  \item 不同信任域之间依赖交叉证书与证书链验证。
+  \item 认证协议常用于会话密钥分发或协商，是后续机密通信基础。
+\end{itemize}
+
+\section{网络设备加固与安全架构（Week 12）}
+
+\subsection{设备与管理面加固}
+\begin{itemize}
+  \item 及时打补丁。
+  \item 交换机端口安全（MAC 绑定/限制）。
+  \item 路由 \texttt{ACL} 先行过滤，降低边界防火墙压力。
+  \item 管理协议优先 \texttt{SNMPv3}（认证、隐私、访问控制）。
+\end{itemize}
+
+\subsection{安全网络设计原则}
+\begin{itemize}
+  \item 先有安全策略，再落地架构与控制。
+  \item 在设计阶段内建安全，而不是后贴补丁。
+  \item 平衡三角：性能、可用性、安全。
+  \item 减少单点故障：防火墙/路由/链路冗余。
+\end{itemize}
+
+\subsection{边界与内部并重}
+\begin{itemize}
+  \item 仅靠外部边界防护不够，要防内部发起攻击。
+  \item 关键实践：\texttt{DMZ} 分区、主机加固、出站过滤、远程接入端点治理。
+  \item VPN 终端受感染会带来“加密隧道穿透边界”的风险。
+\end{itemize}
+
+\section{边界防护、VPN 与检测响应（Week 13--14）}
+
+\subsection{防火墙基础与策略设计}
+\begin{itemize}
+  \item 防火墙本质：默认拒绝，按策略放行并审计。
+  \item 常见判定维度：源/目的地址、端口服务、连接状态、应用内容。
+  \item 常见动作：\texttt{Accept}、\texttt{Drop}、\texttt{Reject}、\texttt{Authenticate}。
+\end{itemize}
+
+\subsection{防火墙类型}
+\begin{itemize}
+  \item 包过滤（网络/传输层）：
+  \begin{itemize}
+    \item 优点：高性能、部署广。
+    \item 局限：深层应用语义可见性弱。
+  \end{itemize}
+  \item 应用层代理防火墙：
+  \begin{itemize}
+    \item 优点：协议理解更深，策略更细。
+    \item 局限：性能开销更高。
+  \end{itemize}
+  \item 混合型：工程上最常见，按业务组合能力。
+\end{itemize}
+
+\subsection{架构与规则（设计题高频）}
+\begin{itemize}
+  \item 单防火墙架构：部署简单，隔离能力有限。
+  \item 双防火墙架构：外层守公网，内层守内网，\texttt{DMZ} 位于中间，隔离更强。
+  \item 规则顺序遵循首条匹配（first match）：\textbf{具体规则在上，泛化规则在下，最后兜底拒绝}。
+\end{itemize}
+
+\subsection{IPSec 总结}
+\begin{itemize}
+  \item 协议族：\texttt{AH}、\texttt{ESP}、\texttt{IKE}。
+  \item 运行层：网络层，适合站点到站点与全流量保护。
+  \item 模式：
+  \begin{itemize}
+    \item 传输模式：保护上层负载，外层 IP 头保留。
+    \item 隧道模式：封装整个原始 IP 包，更适合 VPN。
+  \end{itemize}
+\end{itemize}
+
+\subsection{\texttt{AH} vs \texttt{ESP}}
+\begin{itemize}
+  \item \texttt{AH}：认证、完整性、防重放；不加密；可保护 IP 头完整性。
+  \item \texttt{ESP}：加密为主，也可提供完整性与认证；常见于 VPN。
+  \item 两者可组合使用，按场景取舍。
+\end{itemize}
+
+\subsection{安全关联与 IKE 两阶段}
+\begin{itemize}
+  \item \texttt{SA}（Security Association）是 IPSec 安全上下文核心。
+  \item \texttt{Phase 1}：建立受保护信道，完成对等体认证与密钥交换（Main/Aggressive）。
+  \item \texttt{Phase 2}：协商具体业务流 \texttt{IPSec SA} 参数并周期更新。
+\end{itemize}
+
+\subsection{SSL/TLS 主线}
+\begin{itemize}
+  \item 位置：位于应用与 TCP 之间，保护应用层数据通道。
+  \item 服务：服务器认证、加密、消息完整性（客户端认证可选）。
+  \item 阶段：握手阶段协商算法与密钥，数据阶段进行加密传输。
+\end{itemize}
+
+\subsection{\texttt{SSL/TLS} vs \texttt{IPSec VPN}}
+\begin{itemize}
+  \item \texttt{SSL/TLS}：更偏应用接入，按会话/应用保护。
+  \item \texttt{IPSec VPN}：更偏网络层隧道，按链路/网段保护。
+  \item 选型应基于业务范围、终端可控性、运维复杂度和合规要求。
+\end{itemize}
+
+\subsection{IDS/IPS（检测与防御联动）}
+\begin{itemize}
+  \item \texttt{HIDS}：主机视角，适合关键资产深度检测。
+  \item \texttt{NIDS}：网络视角，覆盖广，但对加密流量可见性受限。
+  \item 检测模型：
+  \begin{itemize}
+    \item 特征检测：已知威胁效果好。
+    \item 异常检测：可发现未知威胁，但误报率通常更高。
+  \end{itemize}
+  \item 响应方式：被动（日志告警）与主动（断连、重配置、阻断）。
+  \item NIDS 变 IPS（串联在线）要评估性能、可用性与误阻断风险。
+\end{itemize}
+
+\section{综合题答题模板（可直接套用）}
+
+\subsection{模板 A：防火墙/DMZ 设计题}
+\begin{enumerate}
+  \item 先说明安全域：Internet、DMZ、Intranet、管理区。
+  \item 写原则：默认拒绝、最小权限、纵深防御、审计留痕。
+  \item 列核心放行：公网到 DMZ 的必要服务、内网到外网的业务流、DMZ 到内网最小化通道。
+  \item 列拒绝策略：其余全拒绝，出站过滤，伪造源地址过滤。
+  \item 写高可用：双机热备、双链路、配置一致性与变更审计。
+\end{enumerate}
+
+\subsection{模板 B：认证协议分析题}
+\begin{enumerate}
+  \item 指出协议目标：单向/双向认证，是否附带会话密钥建立。
+  \item 检查四点：来源真实性、新鲜性、目标绑定、消息关联。
+  \item 标注攻击面：重放、反射、并发错配、中间人、时钟偏差。
+  \item 给修复建议：引入 Nonce/时间戳、事务 ID、双向绑定、密钥更新周期。
+\end{enumerate}
+
+\subsection{模板 C：IDS/IPS 部署题}
+\begin{enumerate}
+  \item 明确资产分级：互联网出口、边界防火墙后、敏感子网前、关键主机本地。
+  \item 按位置说明传感器：NIDS 与 HIDS 组合部署。
+  \item 给响应分层：先被动告警，关键场景再主动阻断。
+  \item 提醒代价：在线阻断会带来性能、误报与单点问题。
+\end{enumerate}
+
+\section{高频必背清单（考前 15 分钟）}
+
+\begin{enumerate}
+  \item \texttt{BLP}：\texttt{No Read Up, No Write Down}；\texttt{Biba}：\texttt{No Read Down, No Write Up}。
+  \item \texttt{PAP} 弱，\texttt{CHAP} 挑战应答抗重放。
+  \item 认证协议不只要“能验身份”，还要“防重放、能关联请求响应”。
+  \item 新鲜性三件套：时间戳、逻辑序号、Nonce。
+  \item Kerberos：\texttt{AS -> TGS -> Service} 票据链路。
+  \item \texttt{AH} 不加密、\texttt{ESP} 可加密；隧道模式保护更完整。
+  \item \texttt{IKE Phase 1} 建安全信道，\texttt{Phase 2} 建业务 SA。
+  \item \texttt{SSL/TLS} 偏应用层保护，\texttt{IPSec VPN} 偏网络层保护。
+  \item 防火墙规则：首条匹配，先具体后泛化，最后默认拒绝。
+  \item \texttt{HIDS + NIDS} 组合优于单点；异常检测强在未知威胁，弱在误报控制。
+\end{enumerate}
+
+\section{常见失分点}
+\begin{itemize}
+  \item 把 \texttt{BLP/Biba} 的读写方向写反。
+  \item 说 \texttt{CHAP} 会传输口令本身。
+  \item 误写 \texttt{AH} 提供加密，或误写 \texttt{ESP} 保护外层 IP 头完整性。
+  \item 把 \texttt{IKE} 两阶段职责混淆。
+  \item 防火墙题只写“部署防火墙”不写规则顺序、默认拒绝、日志和分区边界。
+  \item 忽略加密流量环境下 \texttt{NIDS} 的可见性限制。
+\end{itemize}
+
+\section*{结语}
+这份总结可直接用于三类题型：
+\begin{itemize}
+  \item 对比题：模型、协议、检测方法的差异与边界。
+  \item 流程题：认证握手、票据交换、IKE 两阶段。
+  \item 设计题：规则、分区、加固、检测与响应的整体方案。
+\end{itemize}
+
+\end{document}

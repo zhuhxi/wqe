@@ -1,0 +1,146 @@
+\documentclass[12pt,a4paper]{ctexart}
+\usepackage[a4paper,margin=2.2cm]{geometry}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\setlist[itemize]{leftmargin=1.6em}
+\setlist[enumerate]{leftmargin=1.8em}
+\hypersetup{colorlinks=true,linkcolor=black,urlcolor=blue}
+
+\title{CNS Review-Text 重要考点（高频版）}
+\author{}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{对比题（必背）}
+
+\begin{enumerate}
+  \item \texttt{Bell-LaPadula (BLP)} vs \texttt{Biba}
+  \begin{itemize}
+    \item \texttt{BLP} 目标是保密性（Confidentiality）：\texttt{No Read Up}，\texttt{No Write Down}。
+    \item \texttt{Biba} 目标是完整性（Integrity）：\texttt{No Read Down}，\texttt{No Write Up}，并且执行也遵循不向上污染（可理解为 \texttt{No Execute Up}）。
+    \item 结论：两者方向相反，一个防泄密，一个防低可信数据污染高可信数据。
+  \end{itemize}
+
+  \item \texttt{PAP} vs \texttt{CHAP}
+  \begin{itemize}
+    \item \texttt{PAP}：口令（或口令哈希）直接发给服务器，容易被嗅探与重放，安全性弱。
+    \item \texttt{CHAP}：挑战-应答，不传输明文口令，每次挑战不同，抗重放更好。
+  \end{itemize}
+
+  \item \texttt{AH} vs \texttt{ESP}（IPSec）
+  \begin{itemize}
+    \item \texttt{AH}：有完整性、认证、防重放；不提供加密；可保护 IP 头完整性。
+    \item \texttt{ESP}：提供加密（机密性）并可提供完整性/认证与防重放；不保护外层 IP 头完整性。
+    \item 结论：\texttt{ESP} 更常用；也可 \texttt{AH+ESP} 组合。
+  \end{itemize}
+
+  \item \texttt{HIDS} vs \texttt{NIDS}
+  \begin{itemize}
+    \item \texttt{HIDS}：部署在主机上，能看日志/系统调用/文件完整性，适合重点服务器深度检测。
+    \item \texttt{NIDS}：部署在网络链路，按流量检测，覆盖面大；但对加密流量可见性差，交换网络下需特殊配置。
+  \end{itemize}
+
+  \item \texttt{SSL/TLS} vs \texttt{IPSec VPN}
+  \begin{itemize}
+    \item \texttt{SSL/TLS}：主要保护传输层之上的应用数据（常见于 HTTPS），更偏应用接入。
+    \item \texttt{IPSec VPN}：网络层隧道封装，可保护整个原始 IP 包（ESP 隧道模式），适合站点到站点/全流量保护。
+  \end{itemize}
+
+  \item \texttt{Signature-based IDS} vs \texttt{Anomaly-based IDS}
+  \begin{itemize}
+    \item 特征型：已知攻击检测好、上线快；但对未知攻击弱、需持续维护签名库。
+    \item 异常型：能发现新型攻击；但误报率通常更高，正常基线难定义。
+  \end{itemize}
+\end{enumerate}
+
+\section{流程题（必背顺序）}
+
+\begin{enumerate}
+  \item \texttt{CHAP} 流程
+  \begin{itemize}
+    \item 客户端发 \texttt{userID}。
+    \item 服务器发随机 \texttt{challenge}。
+    \item 客户端用 \texttt{challenge + password} 计算响应并回传。
+    \item 服务器用本地口令做同样计算，比对一致则通过。
+  \end{itemize}
+
+  \item \texttt{SSL/TLS} 握手（服务器认证场景）
+  \begin{itemize}
+    \item 客户端发起连接并请求页面。
+    \item 服务器发送证书。
+    \item 客户端用本地 CA 公钥链验证证书。
+    \item 验证通过后生成会话对称密钥，用服务器公钥加密发给服务器。
+    \item 服务器用私钥解密得到会话密钥，后续双方用对称密钥加密通信。
+  \end{itemize}
+
+  \item \texttt{Kerberos} 流程（AS/TGS/Service）
+  \begin{itemize}
+    \item \texttt{C -> AS}：请求票据，拿到 \texttt{TGT} 和 \texttt{C-TGS} 短期密钥材料。
+    \item \texttt{C -> TGS}：带 \texttt{TGT} 申请目标服务票据，拿到 \texttt{service ticket} 和 \texttt{C-S} 会话密钥材料。
+    \item \texttt{C -> S}：提交服务票据和认证器，服务端验证后建立会话（可双向确认）。
+    \item 核心思想：长期密钥尽量短时使用，后续靠票据与短期会话密钥。
+  \end{itemize}
+
+  \item \texttt{IKE} 两阶段（IPSec）
+  \begin{itemize}
+    \item \texttt{Phase 1}：建立受保护的 IKE 信道，完成对等体认证、算法协商、共享密钥交换（主模式/野蛮模式）。
+    \item \texttt{Phase 2}：在 Phase 1 保护下协商具体 \texttt{IPSec SA}（AH/ESP 参数、流量选择器、生命周期），用于真实业务流量。
+  \end{itemize}
+
+  \item 认证协议新鲜性（Freshness）机制
+  \begin{itemize}
+    \item 不能只靠加密解决重放问题，必须加 \texttt{Time-stamp}、\texttt{Sequence Number}、\texttt{Nonce} 之一。
+    \item 时间戳方案消息轮次少，但依赖时钟同步；\texttt{Nonce} 更通用但需保证随机且不可预测。
+  \end{itemize}
+\end{enumerate}
+
+\section{设计题（高分模板）}
+
+\begin{enumerate}
+  \item 防火墙规则设计模板
+  \begin{itemize}
+    \item 原则：\texttt{默认拒绝（deny all） + 最小权限 + 显式放行}。
+    \item 先写具体规则再写兜底 \texttt{drop any any}（规则匹配通常是自上而下第一条命中）。
+    \item 同时考虑源地址、目的地址、端口/服务、状态（stateful）、日志审计。
+  \end{itemize}
+
+  \item \texttt{DMZ} 与双防火墙架构
+  \begin{itemize}
+    \item 外防火墙：只允许公网访问 DMZ 必要服务（如 Web/邮件），其余拒绝。
+    \item 内防火墙：严格限制 DMZ 到内网，仅放行明确业务流（如 DNS/邮件中继等）。
+    \item 目标：公网可访问服务与内网核心资产物理/逻辑隔离。
+  \end{itemize}
+
+  \item 网络加固清单（可直接作答）
+  \begin{itemize}
+    \item 设备补丁及时更新（交换机/路由器/防火墙）。
+    \item 交换机启用端口安全（MAC 绑定、限制非法接入）。
+    \item 路由器 ACL 前置过滤恶意或无关流量，减轻边界防火墙压力。
+    \item 使用 \texttt{SNMPv3}（认证+加密+访问控制），避免弱管理协议暴露。
+    \item 关键链路和安全设备做冗余，避免单点故障。
+    \item 主机加固：关闭不必要服务、最小化开放端口、强化认证与审计。
+    \item 出站过滤（egress filtering），防止内网被利用对外攻击。
+    \item 远程接入走 VPN 并强化端点安全，防止“被感染终端穿透内网”。
+  \end{itemize}
+
+  \item IDS/IPS 部署与响应
+  \begin{itemize}
+    \item 典型放置点：防火墙前后、敏感子网前、关键主机本地。
+    \item 响应策略：被动（日志+告警）与主动（断连/重配置/阻断）结合。
+    \item NIDS 若要“防御化”（IPS 能力）需串联在线，但要评估性能与单点风险。
+  \end{itemize}
+\end{enumerate}
+
+\section{常见易错点（考试容易丢分）}
+\begin{enumerate}
+  \item 把 \texttt{BLP} 和 \texttt{Biba} 读写方向记反。
+  \item 误以为 \texttt{CHAP} 会传口令本身。
+  \item 误以为 \texttt{AH} 提供加密，或误以为 \texttt{ESP} 保护外层 IP 头完整性。
+  \item 把 \texttt{IKE Phase 1} 与 \texttt{Phase 2} 职责混淆（先建安全信道，再建业务 SA）。
+  \item 只写“上防火墙”不写规则顺序、默认拒绝、日志与 DMZ 隔离边界。
+  \item 忽略加密流量下 \texttt{NIDS} 可见性问题与交换网络镜像/旁路部署条件。
+\end{enumerate}
+
+\end{document}
