@@ -1,0 +1,681 @@
+Computer and Network Security
+Dr. Chan Yeob Yeun
+
+
+Week 8 - 9
+Weekly Lecture Plan
+     Wk          Contents             Cmt       Wk               Contents               Cmt
+     1    Introduction                          9    Foundations of Network
+                                                     Security II
+
+     2    Foundations of           Tutorial     10   Network-Based Threats and
+          Computer Security        Assig Plan        Attacks
+
+     3    Identification and                    11   Network Security Protocols I
+          Authentication I
+
+     4    Identification and       Quiz 1       12   Network Security Protocols II   Quiz 3
+          Authentication II
+     5    Access Control                        13   Firewalls
+
+
+     6    Modern Computer                       14   IDS / IPS                       Assig
+          Attacks                                                                    Submit
+
+
+     7    Malicious Code           Assig        15   Revision and Presentation
+                                   Confirm
+
+
+     8    Foundations of Network   Quiz 2       16   Exam
+          Security I
+
+
+
+
+P2
+What is Computer and Network Security ?
+
+     Physical     Datalink   Network      Transport Session Presentation Application
+
+      Layer 1     Layer 2    Layer 3      Layer 4       Layer 5   Layer 6      Layer 7
+
+
+
+
+ Confidentiality       Authentication     Integrity     Non-repudiation     Access Control
+
+
+     Encryption         Authentication      Data           Digital
+                        Exchange            Integrity      Signature        Access Control
+Traffic Control
+
+     Routing Control                                       Notarizations
+
+
+         Trust           Security Label      Detection       Anti-Spam         Recovery
+
+
+
+
+P3
+Network Model
+
+ OSI Model
+      7 layers
+      Old
+      Applications often have properties of several layers at once
+            • Makes classification difficult, confusing
+
+ TCP/IP Model
+      "DoD" model (Department of Defense)
+      5 layers
+
+
+
+
+ P4
+OSI 7-Layer Model
+
+
+OSI: Open Systems Interconnection
+     ISO standard
+
+Layered approach provides:
+     Simplification
+     Abstraction
+           • Each layer talks only to the equivalent layer somewhere else
+     Division of responsibilities
+     Standardization and interchangeability of equipment from different makers
+
+
+
+
+P5
+OSI 7-Layer
+
+         APPLICATION                                                       APPLICATION
+          PROCESS                                                           PROCESS
+
+
+                                        APPLICATION
+              7             Application-communications interface.              7
+
+                                      PRESENTATION                                     End
+              6             Code conversions & data reformatting.              6       User
+                                                                                     Systems
+
+
+                                           SESSION
+              5         Interface to allow user identification by name.        5
+                        Communicate messages between applications.
+
+
+                                      TRANSPORT
+              4             Send messages. End-to-end integrity.               4
+                                                                                     Transport
+                                         NETWORK
+              3        Routing & switching of packets between stations         3
+                         and networks. Logical addressing schemes.
+
+
+                                          DATA LINK
+              2        Transfer of packets of information from source to       2
+                               destination. Framing of packets.                           Media
+                                                                                         Access
+                                          PHYSICAL
+              1              Physical transfer of data bit streams             1
+                           between station and transmission media.
+
+
+
+
+P6
+OSI vs. TCP/IP
+
+            OSI
+                                        TCP/IP
+           MODEL
+
+         APPLICATION
+              7                      APPLICATION
+
+                                  Worldwide Web: http
+         PRESENTATION         Remote Login: telnet, rlogin
+              6             Remote Commands: rexec, rsh
+                           File Transfers: ftp, rcp, tftp, UUCP
+                               E-mail: SMTP, POP3, IMAP
+           SESSION        Remote File Systems: NIS/NFS, RPC
+              5
+
+                                      TRANSPORT
+          TRANSPORT
+              4            Tranmission Control Protocol (TCP)
+                              User Datagram Protocol (UDP)
+                                  INTERNETWORKING
+           NETWORK
+              3                   Internet Protocol (IP)
+                        Internet Control Message Protocol (ICMP)
+                                 NETWORK INTERFACE
+          DATA LINK
+                                         &
+             2
+                                     HARDWARE
+                                    CONNECTIONS
+           PHYSICAL
+                        LAN: Ethernet, Token Ring, FDDI, ATM...
+              1
+                         WAN: SLIP/PPP, X.25, Frame Relay...
+
+
+
+P7
+Security Services and Mechanisms
+
+Security services are Confidentiality, Integrity, Availability, Authentication
+and Access control.
+
+
+Security mechanisms should provide the basis of provision of other
+security services in the majority of network security systems.
+
+
+ISO 7498-2 distinguishes between origin authentication (verifying origin
+of received data) and entity authentication (identity verification)
+
+
+We consider entity authentication.
+Typically achieved by exchange of message called authentication
+protocol
+
+
+
+
+P8
+Definitions
+
+
+Entity authentication:
+ The corroboration that an entity is the one claimed
+
+Unilateral authentication
+ Entity authentication which provides one entity with assurance of
+ the other’s identity but not vice versa
+
+Mutual authentication
+ Entity authentication which provides both entities with assurance of
+ each other’s identity.
+
+
+
+
+P9
+Use of Entity Authentication
+
+
+
+
+ Entity authentication only achieved for an instant in time
+
+
+ Typically provided at start of a connection.
+
+
+ If security (e.g. confidentiality, integrity) is required for information
+ passed in a connection, then keys needed for cryptographic
+ protection can be agreed/exchanged during protocol
+
+
+
+
+P10
+Security Mechanisms
+
+
+
+One security mechanism of entity authentication is
+“authenticated session key establishment”.
+
+
+Other mechanisms are:
+ Secure clock synchronization
+ Secure RPC (Remote Procedure Call),
+ Secure transactions.
+
+
+
+
+P11
+Properties of an authentication protocol
+
+
+ We consider what properties we require an authentication
+ protocol to satisfy
+
+
+ We set up a model of an authentication protocol and
+ consider what we might require of a protocol in general.
+
+
+
+
+P12
+Authentication protocol model
+
+                                    M1
+
+                                   M2
+
+A                                                               B
+                                   M3
+
+                                   M4
+
+
+      A and B wish to use an authentication protocol to provide either
+      unilateral or mutual authentication. Suppose that protocol consists
+      of a finite sequence of message M1, M2…
+
+
+
+
+P13
+Assumptions for model
+
+
+A starts protocol and sends B message M1
+
+
+B then sends A message M2.
+
+
+A then sends B message M3, and so on.
+
+
+We always assume that A or B will not send message Mi until
+message Mi-1 has been correctly received.
+
+
+
+
+P14
+Requirements I
+
+
+ After the protocol, A wants to be sure that”
+
+
+      1. M2, M4, … were all sent by B (as received),
+
+      2. M2, M4,… are “fresh”, i.e. not replays of old messages
+
+      3. M2, M4,… were intended for A, not for any other entity, and
+
+      4. M2, M4,… were only generated by B after M1, M3,… (respectively)
+         were received correctly.
+
+
+
+
+P15
+Requirement II
+
+
+Similarly, B wants to be sure that
+
+
+      1. M1, M3,…. were all sent by A (as received),
+
+      2. M1, M3,…, are “fresh”, i.e. not replay of old messages
+
+      3. M1, M3,…, were intended for B, and not for any other entity, and
+
+      4. M3, M5,…, were only generated by A after M2, M4,…(respectively)
+         were correctly by A.
+
+
+
+
+P16
+Discussion
+
+
+In some sense requirement (4) implies both (1) and (2) – except for the
+special case of B knowing message M1 was sent by A and is fresh
+(since property (4) has nothing to say about message M1).
+
+
+A and B may not be sure of “beliefs” until completion of protocol.
+Exact list of beliefs needed for a practical protocol may be a subset of
+these lists.
+
+
+However, “generic” protocols (c.f. ISO/IEC 9798) should satisfy as
+many as possible.
+
+
+
+
+P17
+Cryptographic Mechanisms
+
+
+Authentication protocols require use of
+ – Secret (or private) keys
+ – Cryptographic mechanisms
+
+So that message recipient knows:
+ – Where it has come from (origin checking)
+ – Not been interfered with (integrity checking)
+
+Note that cryptography cannot provide freshness checking, i.e. the
+verification a protocol message is not simply a replay of a
+previously transmitted (valid) protocol message, protected using a
+currently valid key (consider this later)
+
+
+
+
+P18
+Three approach
+
+
+Three main possibilities for type of cryptographic mechanism to
+protect message of a protocol:
+
+
+ – Encipherment,
+ – Integrity mechanism (MAC or Cryptographic Check Function),
+ – Digital signature
+
+Let’s consider each in turn more details.
+
+
+
+
+P19
+Encipherment I
+
+To protect a message in a protocol, the sender enciphers it with a
+secret key shared with the recipient.
+
+
+Recipient can verify origin because, when deciphered it “make sense”
+(and only genuine sender knows key).
+
+
+We assume that an interceptor cannot manipulate an enciphered
+message (without knowledge of the key used to encipher it) in such a
+way that it still “make sense” after decipherment.
+
+
+This constrains the type of encipherment algorithm that is suitable for
+use in this application.
+
+
+
+
+P20
+Encipherment II
+
+
+Usual solution – add redundancy according to specified formula to
+message prior to encipherment.
+
+
+Presence of redundancy can be automatically checked by recipient.
+
+
+One popular approach is to append a Manipulation Detection Code
+(MDC) (e.g. a sort of checksum dependent on the entire message) to
+message before encipherment.
+
+
+
+
+P21
+Integrity mechanisms I
+
+
+Various types of data integrity mechanism:
+
+ – Message Authentication Code (MAC) is a function which takes as
+   inputs a secret key and a message, and gives as output a fixed
+   length MAC that is appended to the message as a “cryptographic
+   check value”.
+
+ – One-way function. Message is appended to secret key and input
+   to one-way function. Output is appended to message as check
+   value
+
+ – One-way function is a function which is simple to compute yet
+   computationally infeasible to invert.
+
+
+
+
+P22
+Integrity mechanisms II
+
+
+Typically, a MAC is constructed using a block cipher (e.g. DES) in
+Cipher Block Chaining (CBC) mode.
+
+
+Recipient can always re-compute the check value and hence verify
+  the origin and integrity of a message. The appended check value
+  provide both:
+ – Origin checking, because the originator and verifier are
+   assumed to be the only possessors of the secret key, and hence
+   are the only ones capable of computing a valid check value for a
+   message Integrity checking, because, without the secret key, the
+   new check value corresponding to a changed message cannot
+   be calculated.
+
+
+
+
+P23
+Digital signatures
+
+
+Pair of keys:
+ – Private “signing key” (defines signature transformation), and
+ – Public “verification key” (defines verification transformation).
+
+Signature typically like a MAC, i.e. it is appended to a message
+
+
+Recipient uses public key to verify message, thereby enabling the
+recipient to check the origin and integrity of a message
+
+
+
+
+P24
+Classification by cryptography
+
+
+Can classify authentication protocols by cryptographic mechanism
+they use
+
+
+ISO/IEC 9798:
+ Part 1 (1991): General model
+ Part2 (1994): Using symmetric enchiperment
+ Part3 (1993): Using digital signature
+ Part4 (1995): Using data integrity mechanism
+
+
+
+
+P25
+Freshness mechanisms
+
+
+Origin and integrity checking not enough also need means of
+   checking “freshness” of message, to protect against replays
+
+
+Two main methods
+ – Use of time-stamp (clock-based or logical time-stamps)
+ – Use of “nonce” or challenges (as in challenge-response
+   protocol)
+
+
+
+
+P26
+Clock-based protocol I
+
+
+Inclusion of a date/time stamp in a message enables recipient to
+check it for freshness (as long as time-stamp protected by
+cryptographic means).
+
+
+Requires securely synchronised clocks
+
+
+Non-trivial to provide such clock (Note that clock drift of work-station
+typically 1 second/day)
+
+
+
+
+P27
+Clock-base protocol II
+
+Receiver will need to define time acceptance “window” either side of
+receiver’s current clock value because of
+ Clock variations, hence no two clocks will be precisely synchronised,
+ except perhaps at some instant in time.
+ Messages take time to propagate from one machine to another, and
+ this time will vary unpredictably.
+
+Acceptance window allows for undetectable replays – hence need to
+store a log of recently received messages.
+
+
+
+
+P28
+Synchronised clocks
+
+
+ How do you provide syncrhonised clocks?
+
+
+ One solution – at regular intervals use an authentication protocol
+ not based on time-stamp (e.g. nonce-based) at regular intervals to
+ distribute a master clock value which is then used to update each
+ entity’s individual clock.
+
+
+ Another solution – have reliable access to accurate time source (e.g.
+ national radio broadcast time)
+
+
+
+
+P29
+Logical time-stamp I
+
+
+
+ Alternative to clocks – every pair of communicating entities store a pair
+ of sequence numbers used only in communications between that pair
+
+
+ E.g. for communications between A and B, A must maintain two
+ counter: NAB and NBA
+
+ Every time A sends B a message, value of NAB is included, and NAB is
+ incremented
+
+
+
+
+P30
+Logical time-stamp II
+
+
+ Every time A receives a message from B, then the sequence number put in the
+ message by B (N say) is compared with NBA (as stored by A):
+  If N>NAB then
+           • The message is accepted as fresh and
+           • NBA is reset to equal N,
+  If N  NBA then
+           • The message is rejected as an “old” message
+
+
+ These sequence numbers take the role of what are known as logical time-
+ stamps
+
+
+ All time stamp protocols have problems in providing property (4) from the list
+ of desired properties for an authentication protocol
+
+
+
+
+P31
+Nonce-based protocol I
+
+
+ Nonce-based protocols use a quite different mechanism to provide
+ freshness checking
+
+ A sends B a nonce (Number used ONCE) as a challenge
+
+ B includes the nonce in the response to A
+
+ Because the nonce has never been used before, A can verify the
+ freshness of B’s response (given message integrity is protected by
+ cryptography).
+
+
+
+
+P32
+Nonce-based protocols II
+
+Up to A (who chooses nonce) to make sure it is “new”
+
+Main property is “onetime” property, and thus, in theory, could be provided
+using a counter
+
+However, many protocols (to operate correctly) also need nonces to be
+unpredictable to any third party
+
+There are problems with the provision of properties (2) and (4) with some
+nonce-based protocols if nonces can be predicted by third parties
+
+Nonce are typically chosen at random form a set sufficiently large to mean
+that the probability of the same nonce being used twice is effectively zero
+
+
+
+
+P33
+Summary
+
+Three main possibilities for type of cryptographic mechanism to
+protect message of a protocol:
+ – Encipherment,
+ – Integrity mechanism (MAC or Cryptographic Check Function),
+ – Digital signature
+
+Cryptography cannot provide freshness checking
+
+
+Origin and integrity checking not enough also need means of checking
+“freshness” of message, to protect against replays
+ – Time-Stamp
+ – Sequence Number (Logical Time-Stamp)
+ – Nonce
+
+
+
+P34
+
